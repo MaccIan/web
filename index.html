@@ -7,7 +7,7 @@
 <meta name="description" content="Maccia — podtatranská dielňa. Laserom rezané a gravírované drevo: 3D LED dekorácie, gravírovanie na zákazku, spolupráce s fotografmi.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;500;700&family=Josefin+Sans:wght@200;300&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --night:#131110;
@@ -41,9 +41,7 @@
     display:flex;
     flex-direction:column;
     overflow:hidden;
-    background:
-      radial-gradient(ellipse 90% 55% at 50% 110%, rgba(255,180,94,.10), transparent 60%),
-      var(--night);
+    background:var(--night);
   }
   .topbar{
     display:flex;
@@ -53,7 +51,7 @@
     font-family:'Tektur',sans-serif;
     font-size:.78rem;
     letter-spacing:.22em;
-    text-transform:uppercase;
+    text-transform:none;
     color:var(--muted);
     z-index:2;
   }
@@ -71,10 +69,10 @@
     z-index:2;
   }
   .wordmark{
-    font-family:'Tektur',sans-serif;
-    font-weight:400;
+    font-family:'Josefin Sans',sans-serif;
+    font-weight:300;
     font-size:clamp(3rem,13vw,9rem);
-    letter-spacing:.12em;
+    letter-spacing:.08em;
     line-height:1;
     color:var(--text);
     text-shadow:
@@ -110,6 +108,11 @@
     display:block;
     pointer-events:none;
   }
+  .ridge-back1,.ridge-back2{will-change:transform}
+  .beam-burst{transform:translate(374px,560px)}
+  @media (max-width:720px){
+    .beam-burst{transform:translate(960px,560px)}
+  }
   .glowline{
     fill:none;
     stroke:var(--glow);
@@ -124,11 +127,59 @@
   }
   @media (prefers-reduced-motion:no-preference){
     .glowline{
-      stroke-dasharray:1800;
-      stroke-dashoffset:1800;
-      animation:draw 2.6s ease-out .3s forwards;
+      stroke-dasharray:100;
+      stroke-dashoffset:100;
     }
+    /* počas jazdy sú lúče len maličké (18 % dĺžky) */
+    .beam-burst line{
+      stroke-dasharray:100;
+      stroke-dashoffset:82;
+    }
+    /* štart: bod čaká na pravom okraji */
+    .beam-burst{transform:translate(1440px,560px)}
+    /* 1. bod s mini lúčmi ide sprava doľava a za ním rastie čiara */
+    .ridges.drawn .beam-burst{
+      animation:carriage 2.2s ease-in-out .4s forwards;
+    }
+    .ridges.drawn .glowline{
+      animation:draw 2.2s ease-in-out .4s forwards;
+    }
+    /* 2. po dojazde sa mini lúče roztiahnu do plnej dĺžky */
+    .ridges.drawn .beam-burst line{
+      animation:ray .8s cubic-bezier(.22,.9,.35,1) 2.7s forwards;
+    }
+    @keyframes carriage{to{transform:translate(374px,560px)}}
     @keyframes draw{to{stroke-dashoffset:0}}
+    @keyframes ray{to{stroke-dashoffset:0}}
+  }
+  /* Mobil: bod zastane tesne za ľavým okrajom obrazovky, do záberu vytŕčajú len lúče */
+  @media (max-width:720px){
+    .beam-burst{transform:translate(450px,560px)}
+  }
+  @media (max-width:720px) and (prefers-reduced-motion:reduce){
+    .glowline{stroke-dasharray:100;stroke-dashoffset:7.1}
+  }
+  @media (max-width:720px) and (prefers-reduced-motion:no-preference){
+    .beam-burst{transform:translate(1440px,560px)}
+    @keyframes carriage{to{transform:translate(450px,560px)}}
+    @keyframes draw{to{stroke-dashoffset:7.1}}
+  }
+  /* mobil: bod dojazdí len k pravému okraju obrazovky, čiara končí pri ňom */
+  @media (prefers-reduced-motion:no-preference) and (max-width:720px){
+    .ridges.drawn .beam-burst{
+      animation:carriage-m 1.6s ease-in-out .4s forwards;
+    }
+    .ridges.drawn .glowline{
+      animation:draw-m 1.6s ease-in-out .4s forwards;
+    }
+    .ridges.drawn .beam-burst line{
+      animation:ray .8s cubic-bezier(.22,.9,.35,1) 2.1s forwards;
+    }
+    @keyframes carriage-m{
+      from{transform:translate(1440px,560px)}
+      to{transform:translate(960px,560px)}
+    }
+    @keyframes draw-m{to{stroke-dashoffset:55}}
   }
 
   /* ---------- SEKCIE ---------- */
@@ -141,7 +192,16 @@
     letter-spacing:.04em;
     margin-bottom:.75rem;
   }
-  .sec-lead{color:var(--muted);max-width:58ch;margin-bottom:3rem}
+  .sec-lead{color:var(--muted);max-width:58ch;margin-bottom:3rem;font-size:1.08rem}
+  .sec-sub{
+    font-family:'Tektur',sans-serif;
+    font-weight:500;
+    font-size:clamp(1.05rem,2.2vw,1.3rem);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--wood);
+    margin-bottom:1.8rem;
+  }
 
   .grid{
     display:grid;
@@ -164,6 +224,12 @@
   .contact{background:var(--night-2)}
   .contact .inner{text-align:center}
   .contact .sec-lead{margin:0 auto 2.2rem}
+  .contact-title{
+    font-family:'Josefin Sans',sans-serif;
+    font-weight:300;
+    letter-spacing:.1em;
+    font-size:clamp(1.7rem,3.8vw,2.5rem);
+  }
   .mailbtn{
     display:inline-block;
     font-family:'Tektur',sans-serif;
@@ -208,38 +274,72 @@
 
 <header class="hero">
   <nav class="topbar">
-    <span>Maccia</span>
-    <a href="#kontakt">Kontakt</a>
+    <span>maccia</span>
+    <a href="#kontakt">kontakt</a>
   </nav>
 
   <div class="hero-center">
     <p class="hero-eyebrow">Podtatranská dielňa</p>
-    <h1 class="wordmark">MA<span class="led">CC</span>IA</h1>
+    <h1 class="wordmark">ma<span class="led">cc</span>ia</h1>
     <p class="tagline">Rezanie a gravírovanie laserom.</p>
   </div>
 
   <!-- Vrstvené hrebene hôr s LED linkou -->
   <svg class="ridges" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <!-- zadné vrstvy hôr -->
-    <polygon points="0,690 170,600 320,660 500,560 660,640 800,540 960,630 1120,570 1280,660 1440,610 1440,900 0,900"
-             fill="#c99a63" opacity="0.07"/>
-    <polygon points="0,730 150,650 330,700 480,600 640,680 780,585 950,665 1100,610 1260,700 1440,660 1440,900 0,900"
-             fill="#c99a63" opacity="0.13"/>
-    <!-- LED linka kopíruje predný hrebeň -->
+    <!-- SKÚŠOBNÁ VERZIA: laserový bod s lúčmi. Pôvodné hory sú v zakomentovanom bloku nižšie. -->
+    <g class="beam-burst" stroke="var(--glow)" stroke-width="1.8" stroke-linecap="round"
+       style="filter:drop-shadow(0 0 10px rgba(255,180,94,.5))">
+      <line pathLength="100" transform="rotate(12)"  x1="5" y1="0" x2="88"  y2="0"/>
+      <line pathLength="100" transform="rotate(27)"  x1="5" y1="0" x2="142" y2="0"/>
+      <line pathLength="100" transform="rotate(44)"  x1="5" y1="0" x2="70"  y2="0"/>
+      <line pathLength="100" transform="rotate(63)"  x1="5" y1="0" x2="155" y2="0"/>
+      <line pathLength="100" transform="rotate(78)"  x1="5" y1="0" x2="105" y2="0"/>
+      <line pathLength="100" transform="rotate(92)"  x1="5" y1="0" x2="170" y2="0"/>
+      <line pathLength="100" transform="rotate(108)" x1="5" y1="0" x2="62"  y2="0"/>
+      <line pathLength="100" transform="rotate(124)" x1="5" y1="0" x2="118" y2="0"/>
+      <line pathLength="100" transform="rotate(141)" x1="5" y1="0" x2="90"  y2="0"/>
+      <line pathLength="100" transform="rotate(153)" x1="5" y1="0" x2="135" y2="0"/>
+      <line pathLength="100" transform="rotate(168)" x1="5" y1="0" x2="75"  y2="0"/>
+      <line pathLength="100" transform="rotate(182)" x1="5" y1="0" x2="205" y2="0"/>
+      <line pathLength="100" transform="rotate(197)" x1="5" y1="0" x2="98"  y2="0"/>
+      <line pathLength="100" transform="rotate(213)" x1="5" y1="0" x2="150" y2="0"/>
+      <line pathLength="100" transform="rotate(228)" x1="5" y1="0" x2="80"  y2="0"/>
+      <line pathLength="100" transform="rotate(246)" x1="5" y1="0" x2="125" y2="0"/>
+      <line pathLength="100" transform="rotate(262)" x1="5" y1="0" x2="160" y2="0"/>
+      <line pathLength="100" transform="rotate(277)" x1="5" y1="0" x2="68"  y2="0"/>
+      <line pathLength="100" transform="rotate(291)" x1="5" y1="0" x2="112" y2="0"/>
+      <line pathLength="100" transform="rotate(308)" x1="5" y1="0" x2="140" y2="0"/>
+      <line pathLength="100" transform="rotate(322)" x1="5" y1="0" x2="85"  y2="0"/>
+      <line pathLength="100" transform="rotate(338)" x1="5" y1="0" x2="120" y2="0"/>
+      <line pathLength="100" transform="rotate(352)" x1="5" y1="0" x2="65"  y2="0"/>
+      <circle r="6" fill="var(--glow)" stroke="none"/>
+    </g>
+    <!-- dlhý horizontálny lúč — kreslí sa sprava doľava spolu s pohybom bodu -->
+    <polyline class="glowline blur" pathLength="100" points="1440,560 374,560"/>
+    <polyline class="glowline" pathLength="100" points="1440,560 374,560"/>
+    <!-- PÔVODNÉ HORY (pre návrat zmaž tento riadok aj koncový koniec komentára)
+    <g class="ridge-back1">
+      <polygon points="0,655 90,625 170,600 250,570 340,515 430,565 520,605 610,555 700,535 790,515 880,462 965,470 1060,535 1150,560 1240,585 1330,600 1440,585 1440,900 0,900"
+               fill="#c99a63" opacity="0.07"/>
+    </g>
+    <g class="ridge-back2">
+      <polygon points="0,710 80,678 160,660 240,628 330,568 420,618 510,662 600,610 690,588 780,570 870,515 960,522 1050,590 1140,615 1230,640 1320,655 1440,640 1440,900 0,900"
+               fill="#c99a63" opacity="0.13"/>
+    </g>
     <polyline class="glowline blur"
-              points="0,780 140,700 300,760 470,640 600,720 720,610 850,715 990,650 1140,760 1290,700 1440,750"/>
+              points="0,780 60,755 100,762 150,730 190,742 230,700 270,712 310,672 360,640 410,690 450,712 490,700 520,740 560,725 600,682 640,702 690,662 730,676 770,646 810,660 845,612 880,588 910,620 935,605 965,598 1000,640 1040,662 1080,690 1120,672 1160,700 1200,688 1240,712 1280,700 1320,728 1360,716 1400,730 1440,712"/>
     <polyline class="glowline"
-              points="0,780 140,700 300,760 470,640 600,720 720,610 850,715 990,650 1140,760 1290,700 1440,750"/>
-    <!-- predná (najtmavšia) vrstva -->
-    <polygon points="0,782 140,702 300,762 470,642 600,722 720,612 850,717 990,652 1140,762 1290,702 1440,752 1440,900 0,900"
+              points="0,780 60,755 100,762 150,730 190,742 230,700 270,712 310,672 360,640 410,690 450,712 490,700 520,740 560,725 600,682 640,702 690,662 730,676 770,646 810,660 845,612 880,588 910,620 935,605 965,598 1000,640 1040,662 1080,690 1120,672 1160,700 1200,688 1240,712 1280,700 1320,728 1360,716 1400,730 1440,712"/>
+    <polygon points="0,782 60,757 100,764 150,732 190,744 230,702 270,714 310,674 360,642 410,692 450,714 490,702 520,742 560,727 600,684 640,704 690,664 730,678 770,648 810,662 845,614 880,590 910,622 935,607 965,600 1000,642 1040,664 1080,692 1120,674 1160,702 1200,690 1240,714 1280,702 1320,730 1360,718 1400,732 1440,714 1440,900 0,900"
              fill="#0c0a09"/>
+    KONIEC PÔVODNÝCH HÔR -->
   </svg>
 </header>
 
 <section id="dielna">
   <div class="inner">
-    <h2 class="sec-title">Čo vzniká v dielni</h2>
     <p class="sec-lead">Maccia je malá dielňa pod Tatrami. Režeme a gravírujeme CO2 laserom — prevažne drevo, s dôrazom na čisté línie a poctivé detaily.</p>
+    <h3 class="sec-sub">Čo vzniká v dielni</h3>
     <div class="grid">
       <div class="cell">
         <h3>3D LED dekorácie</h3>
@@ -259,17 +359,69 @@
 
 <section id="kontakt" class="contact">
   <div class="inner">
-    <h2 class="sec-title">Napíšte nám</h2>
+    <h2 class="sec-title contact-title">Napíšte nám</h2>
     <p class="sec-lead">Máte nápad na zákazku alebo spoluprácu? Radi si ho vypočujeme.</p>
+    <!-- e-mail zatiaľ skrytý — odkomentuj, keď bude schránka funkčná
     <a class="mailbtn" href="mailto:info@maccia.sk">info@maccia.sk</a>
-    <p class="wip">Stránka je v príprave — plná ponuka pribudne čoskoro.</p>
+    -->
+    <p class="wip">Stránka je v príprave — kontakt a plná ponuka pribudnú čoskoro.</p>
   </div>
 </section>
 
 <footer>
-  <span>© 2026 Maccia</span>
+  <span>© 2026 maccia</span>
   <span>maccia.sk</span>
 </footer>
 
+<script>
+(function(){
+  var svg = document.querySelector('.ridges');
+  if(!svg) return;
+  if(!('IntersectionObserver' in window)){ svg.classList.add('drawn'); return; }
+
+  function start(){ svg.classList.add('drawn'); }
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      io.disconnect();
+      if(document.hidden){
+        // karta je v pozadí — počkaj, kým sa na ňu používateľ prepne
+        document.addEventListener('visibilitychange', function h(){
+          if(!document.hidden){ start(); document.removeEventListener('visibilitychange', h); }
+        });
+      } else {
+        start();
+      }
+    });
+  }, {threshold: 0.35});
+
+  io.observe(svg);
+
+  // Parallax: pri scrolle nadol sa zadné vrstvy zbiehajú k prednej,
+  // pri scrolle nahor sa medzery opäť roztvoria.
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var back1 = svg.querySelector('.ridge-back1');
+    var back2 = svg.querySelector('.ridge-back2');
+    var hero = document.querySelector('.hero');
+    if(back1 && back2 && hero){
+      var ticking = false;
+      function update(){
+        ticking = false;
+        var range = hero.offsetHeight * 0.6;               // dráha scrollu, počas ktorej sa vrstvy zlejú
+        var p = Math.min(Math.max(window.scrollY / range, 0), 1);
+        back1.style.transform = 'translateY(' + (p * 130) + 'px)';
+        back2.style.transform = 'translateY(' + (p * 80) + 'px)';
+      }
+      function onScroll(){
+        if(!ticking){ ticking = true; requestAnimationFrame(update); }
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+      window.addEventListener('resize', onScroll, {passive:true});
+      update();
+    }
+  }
+})();
+</script>
 </body>
 </html>
