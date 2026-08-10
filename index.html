@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maccia — gravírovanie a rezanie laserom</title>
+<meta name="description" content="Maccia — podtatranská dielňa. Laserom rezané a gravírované drevo: 3D LED dekorácie, gravírovanie na zákazku, spolupráce s fotografmi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#131110;
+    --night-2:#1a1714;
+    --wood:#c99a63;
+    --wood-dim:#8a6f4e;
+    --glow:#ffb45e;
+    --text:#e8e0d4;
+    --muted:#9a9184;
+    --line:rgba(201,154,99,.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--night);
+    color:var(--text);
+    font-family:'Instrument Sans',system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--glow);color:var(--night)}
+  a{color:var(--glow);text-decoration:none}
+  a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--glow);outline-offset:3px;border-radius:2px}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100svh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% 110%, rgba(255,180,94,.10), transparent 60%),
+      var(--night);
+  }
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:1.5rem clamp(1.25rem,4vw,3rem);
+    font-family:'Tektur',sans-serif;
+    font-size:.78rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    z-index:2;
+  }
+  .topbar a{color:var(--muted)}
+  .topbar a:hover{color:var(--glow);text-decoration:none}
+
+  .hero-center{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:0 1.25rem 28vh;
+    z-index:2;
+  }
+  .wordmark{
+    font-family:'Tektur',sans-serif;
+    font-weight:400;
+    font-size:clamp(3rem,13vw,9rem);
+    letter-spacing:.12em;
+    line-height:1;
+    color:var(--text);
+    text-shadow:
+      0 0 14px rgba(255,180,94,.45),
+      0 0 46px rgba(255,180,94,.25);
+    user-select:none;
+  }
+  .wordmark .led{
+    color:var(--text);
+  }
+  .tagline{
+    margin-top:1.4rem;
+    font-size:clamp(1rem,2.4vw,1.25rem);
+    color:var(--muted);
+    max-width:34ch;
+  }
+  .tagline strong{color:var(--wood);font-weight:600}
+  .hero-eyebrow{
+    font-family:'Tektur',sans-serif;
+    font-size:clamp(.9rem,1.8vw,1.05rem);
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:var(--wood-dim);
+    margin-bottom:1.2rem;
+  }
+
+  /* ---------- HORY ---------- */
+  .ridges{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none;
+  }
+  .glowline{
+    fill:none;
+    stroke:var(--glow);
+    stroke-width:2.5;
+    stroke-linejoin:round;
+    stroke-linecap:round;
+  }
+  .glowline.blur{
+    stroke-width:9;
+    opacity:.45;
+    filter:blur(7px);
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .glowline{
+      stroke-dasharray:1800;
+      stroke-dashoffset:1800;
+      animation:draw 2.6s ease-out .3s forwards;
+    }
+    @keyframes draw{to{stroke-dashoffset:0}}
+  }
+
+  /* ---------- SEKCIE ---------- */
+  section{padding:clamp(4rem,9vw,7rem) clamp(1.25rem,4vw,3rem)}
+  .inner{max-width:1040px;margin:0 auto}
+  .sec-title{
+    font-family:'Tektur',sans-serif;
+    font-weight:700;
+    font-size:clamp(1.5rem,3.4vw,2.2rem);
+    letter-spacing:.04em;
+    margin-bottom:.75rem;
+  }
+  .sec-lead{color:var(--muted);max-width:58ch;margin-bottom:3rem}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:2.5rem 3rem;
+  }
+  .cell{border-top:1px solid var(--line);padding-top:1.4rem}
+  .cell h3{
+    font-family:'Tektur',sans-serif;
+    font-weight:500;
+    font-size:1.02rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--wood);
+    margin-bottom:.6rem;
+  }
+  .cell p{color:var(--muted);font-size:.97rem}
+
+  /* ---------- KONTAKT ---------- */
+  .contact{background:var(--night-2)}
+  .contact .inner{text-align:center}
+  .contact .sec-lead{margin:0 auto 2.2rem}
+  .mailbtn{
+    display:inline-block;
+    font-family:'Tektur',sans-serif;
+    font-weight:700;
+    font-size:clamp(1.1rem,3vw,1.5rem);
+    letter-spacing:.05em;
+    color:var(--glow);
+    border:1px solid var(--wood-dim);
+    padding:.9rem 2rem;
+    transition:box-shadow .25s,border-color .25s;
+  }
+  .mailbtn:hover{
+    text-decoration:none;
+    border-color:var(--glow);
+    box-shadow:0 0 24px rgba(255,180,94,.25);
+  }
+  .wip{
+    margin-top:2.4rem;
+    font-size:.85rem;
+    color:var(--wood-dim);
+    letter-spacing:.06em;
+  }
+
+  footer{
+    padding:2rem clamp(1.25rem,4vw,3rem);
+    display:flex;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    font-size:.82rem;
+    color:var(--wood-dim);
+    border-top:1px solid var(--line);
+  }
+
+  @media (max-width:720px){
+    .grid{grid-template-columns:1fr;gap:2rem}
+    .hero-center{padding-bottom:32vh}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <nav class="topbar">
+    <span>Maccia</span>
+    <a href="#kontakt">Kontakt</a>
+  </nav>
+
+  <div class="hero-center">
+    <p class="hero-eyebrow">Podtatranská dielňa</p>
+    <h1 class="wordmark">MA<span class="led">CC</span>IA</h1>
+    <p class="tagline">Rezanie a gravírovanie laserom.</p>
+  </div>
+
+  <!-- Vrstvené hrebene hôr s LED linkou -->
+  <svg class="ridges" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <!-- zadné vrstvy hôr -->
+    <polygon points="0,690 170,600 320,660 500,560 660,640 800,540 960,630 1120,570 1280,660 1440,610 1440,900 0,900"
+             fill="#c99a63" opacity="0.07"/>
+    <polygon points="0,730 150,650 330,700 480,600 640,680 780,585 950,665 1100,610 1260,700 1440,660 1440,900 0,900"
+             fill="#c99a63" opacity="0.13"/>
+    <!-- LED linka kopíruje predný hrebeň -->
+    <polyline class="glowline blur"
+              points="0,780 140,700 300,760 470,640 600,720 720,610 850,715 990,650 1140,760 1290,700 1440,750"/>
+    <polyline class="glowline"
+              points="0,780 140,700 300,760 470,640 600,720 720,610 850,715 990,650 1140,760 1290,700 1440,750"/>
+    <!-- predná (najtmavšia) vrstva -->
+    <polygon points="0,782 140,702 300,762 470,642 600,722 720,612 850,717 990,652 1140,762 1290,702 1440,752 1440,900 0,900"
+             fill="#0c0a09"/>
+  </svg>
+</header>
+
+<section id="dielna">
+  <div class="inner">
+    <h2 class="sec-title">Čo vzniká v dielni</h2>
+    <p class="sec-lead">Maccia je malá dielňa pod Tatrami. Režeme a gravírujeme CO2 laserom — prevažne drevo, s dôrazom na čisté línie a poctivé detaily.</p>
+    <div class="grid">
+      <div class="cell">
+        <h3>3D LED dekorácie</h3>
+        <p>Veľkoformátové nástenné obrazy z vrstveného dreva s podsvietením. Hory, hrebene a scény, ktoré v tme ožijú.</p>
+      </div>
+      <div class="cell">
+        <h3>Gravírovanie na zákazku</h3>
+        <p>Osobné venovania, logá a motívy do dreva. Darčeky, ktoré sa nedajú kúpiť v obchode.</p>
+      </div>
+      <div class="cell">
+        <h3>Pre fotografov</h3>
+        <p>Rámiky, kalendáre a svadobné knihy ako doplnok k vašim zákazkám. Ozvite sa, dohodneme spoluprácu.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="kontakt" class="contact">
+  <div class="inner">
+    <h2 class="sec-title">Napíšte nám</h2>
+    <p class="sec-lead">Máte nápad na zákazku alebo spoluprácu? Radi si ho vypočujeme.</p>
+    <a class="mailbtn" href="mailto:info@maccia.sk">info@maccia.sk</a>
+    <p class="wip">Stránka je v príprave — plná ponuka pribudne čoskoro.</p>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Maccia</span>
+  <span>maccia.sk</span>
+</footer>
+
+</body>
+</html>
