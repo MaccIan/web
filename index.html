@@ -109,10 +109,6 @@
     pointer-events:none;
   }
   .ridge-back1,.ridge-back2{will-change:transform}
-  .beam-burst{transform:translate(374px,560px)}
-  @media (max-width:720px){
-    .beam-burst{transform:translate(960px,560px)}
-  }
   .glowline{
     fill:none;
     stroke:var(--glow);
@@ -135,51 +131,11 @@
       stroke-dasharray:100;
       stroke-dashoffset:82;
     }
-    /* štart: bod čaká na pravom okraji */
-    .beam-burst{transform:translate(1440px,560px)}
-    /* 1. bod s mini lúčmi ide sprava doľava a za ním rastie čiara */
-    .ridges.drawn .beam-burst{
-      animation:carriage 2.2s ease-in-out .4s forwards;
+    /* po dojazde (JS pridá triedu .engraved) sa mini lúče roztiahnu do plnej dĺžky */
+    .ridges.engraved .beam-burst line{
+      animation:ray .8s cubic-bezier(.22,.9,.35,1) .05s forwards;
     }
-    .ridges.drawn .glowline{
-      animation:draw 2.2s ease-in-out .4s forwards;
-    }
-    /* 2. po dojazde sa mini lúče roztiahnu do plnej dĺžky */
-    .ridges.drawn .beam-burst line{
-      animation:ray .8s cubic-bezier(.22,.9,.35,1) 2.7s forwards;
-    }
-    @keyframes carriage{to{transform:translate(374px,560px)}}
-    @keyframes draw{to{stroke-dashoffset:0}}
     @keyframes ray{to{stroke-dashoffset:0}}
-  }
-  /* Mobil: bod zastane tesne za ľavým okrajom obrazovky, do záberu vytŕčajú len lúče */
-  @media (max-width:720px){
-    .beam-burst{transform:translate(450px,560px)}
-  }
-  @media (max-width:720px) and (prefers-reduced-motion:reduce){
-    .glowline{stroke-dasharray:100;stroke-dashoffset:7.1}
-  }
-  @media (max-width:720px) and (prefers-reduced-motion:no-preference){
-    .beam-burst{transform:translate(1440px,560px)}
-    @keyframes carriage{to{transform:translate(450px,560px)}}
-    @keyframes draw{to{stroke-dashoffset:7.1}}
-  }
-  /* mobil: bod dojazdí len k pravému okraju obrazovky, čiara končí pri ňom */
-  @media (prefers-reduced-motion:no-preference) and (max-width:720px){
-    .ridges.drawn .beam-burst{
-      animation:carriage-m 1.6s ease-in-out .4s forwards;
-    }
-    .ridges.drawn .glowline{
-      animation:draw-m 1.6s ease-in-out .4s forwards;
-    }
-    .ridges.drawn .beam-burst line{
-      animation:ray .8s cubic-bezier(.22,.9,.35,1) 2.1s forwards;
-    }
-    @keyframes carriage-m{
-      from{transform:translate(1440px,560px)}
-      to{transform:translate(960px,560px)}
-    }
-    @keyframes draw-m{to{stroke-dashoffset:55}}
   }
 
   /* ---------- SEKCIE ---------- */
@@ -287,7 +243,7 @@
   <!-- Vrstvené hrebene hôr s LED linkou -->
   <svg class="ridges" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
     <!-- SKÚŠOBNÁ VERZIA: laserový bod s lúčmi. Pôvodné hory sú v zakomentovanom bloku nižšie. -->
-    <g class="beam-burst" stroke="var(--glow)" stroke-width="1.8" stroke-linecap="round"
+    <g class="beam-burst" transform="translate(1440,560)" stroke="var(--glow)" stroke-width="1.8" stroke-linecap="round"
        style="filter:drop-shadow(0 0 10px rgba(255,180,94,.5))">
       <line pathLength="100" transform="rotate(12)"  x1="5" y1="0" x2="88"  y2="0"/>
       <line pathLength="100" transform="rotate(27)"  x1="5" y1="0" x2="142" y2="0"/>
@@ -377,30 +333,60 @@
 (function(){
   var svg = document.querySelector('.ridges');
   if(!svg) return;
-  if(!('IntersectionObserver' in window)){ svg.classList.add('drawn'); return; }
 
-  function start(){ svg.classList.add('drawn'); }
+  var burst = svg.querySelector('.beam-burst');
+  var lines = svg.querySelectorAll('.glowline');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mobile = window.matchMedia('(max-width: 720px)').matches;
+  // na mobile bod zastane tesne za ľavým okrajom výrezu, vytŕčajú len lúče
+  var endX = mobile ? 450 : 374;
+  var endOff = mobile ? 7.1 : 0;   // čiara končí presne pri bode
 
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(!e.isIntersecting) return;
-      io.disconnect();
-      if(document.hidden){
-        // karta je v pozadí — počkaj, kým sa na ňu používateľ prepne
-        document.addEventListener('visibilitychange', function h(){
-          if(!document.hidden){ start(); document.removeEventListener('visibilitychange', h); }
-        });
-      } else {
-        start();
-      }
-    });
-  }, {threshold: 0.35});
+  function setPos(x){ if(burst) burst.setAttribute('transform', 'translate(' + x + ',560)'); }
+  function setOff(o){
+    for(var i = 0; i < lines.length; i++){ lines[i].style.strokeDashoffset = o; }
+  }
+  function finalize(){ setPos(endX); setOff(endOff); svg.classList.add('engraved'); }
 
-  io.observe(svg);
+  function run(){
+    if(reduce){ finalize(); return; }
+    var D = 2200, delay = 400, t0 = null;
+    setPos(1440); setOff(100);
+    function ease(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
+    function frame(ts){
+      if(t0 === null) t0 = ts;
+      var t = Math.min(Math.max((ts - t0 - delay) / D, 0), 1);
+      var p = ease(t);
+      setPos(1440 + (endX - 1440) * p);
+      setOff(100 - (100 - endOff) * p);
+      if(t < 1){ requestAnimationFrame(frame); }
+      else { svg.classList.add('engraved'); }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  if(!('IntersectionObserver' in window)){ finalize(); }
+  else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(!e.isIntersecting) return;
+        io.disconnect();
+        if(document.hidden){
+          // karta je v pozadí — počkaj, kým sa na ňu používateľ prepne
+          document.addEventListener('visibilitychange', function h(){
+            if(!document.hidden){ run(); document.removeEventListener('visibilitychange', h); }
+          });
+        } else {
+          run();
+        }
+      });
+    }, {threshold: 0.35});
+    io.observe(svg);
+  }
 
   // Parallax: pri scrolle nadol sa zadné vrstvy zbiehajú k prednej,
   // pri scrolle nahor sa medzery opäť roztvoria.
-  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  if(!reduce){
     var back1 = svg.querySelector('.ridge-back1');
     var back2 = svg.querySelector('.ridge-back2');
     var hero = document.querySelector('.hero');
