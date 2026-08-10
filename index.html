@@ -119,7 +119,6 @@
   .glowline.blur{
     stroke-width:9;
     opacity:.45;
-    filter:blur(7px);
   }
   @media (prefers-reduced-motion:no-preference){
     .glowline{
@@ -242,9 +241,17 @@
 
   <!-- Vrstvené hrebene hôr s LED linkou -->
   <svg class="ridges" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <filter id="lineGlow" filterUnits="userSpaceOnUse" x="0" y="360" width="1600" height="400">
+        <feGaussianBlur stdDeviation="7"/>
+      </filter>
+      <filter id="burstGlow" filterUnits="userSpaceOnUse" x="-280" y="-280" width="560" height="560">
+        <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ffb45e" flood-opacity="0.55"/>
+      </filter>
+    </defs>
     <!-- SKÚŠOBNÁ VERZIA: laserový bod s lúčmi. Pôvodné hory sú v zakomentovanom bloku nižšie. -->
     <g class="beam-burst" transform="translate(1440,560)" stroke="var(--glow)" stroke-width="1.8" stroke-linecap="round"
-       style="filter:drop-shadow(0 0 10px rgba(255,180,94,.5))">
+       filter="url(#burstGlow)">
       <line pathLength="100" transform="rotate(12)"  x1="5" y1="0" x2="88"  y2="0"/>
       <line pathLength="100" transform="rotate(27)"  x1="5" y1="0" x2="142" y2="0"/>
       <line pathLength="100" transform="rotate(44)"  x1="5" y1="0" x2="70"  y2="0"/>
@@ -271,7 +278,7 @@
       <circle r="6" fill="var(--glow)" stroke="none"/>
     </g>
     <!-- dlhý horizontálny lúč — kreslí sa sprava doľava spolu s pohybom bodu -->
-    <polyline class="glowline blur" pathLength="100" points="1440,560 374,560"/>
+    <polyline class="glowline blur" filter="url(#lineGlow)" pathLength="100" points="1440,560 374,560"/>
     <polyline class="glowline" pathLength="100" points="1440,560 374,560"/>
     <!-- PÔVODNÉ HORY (pre návrat zmaž tento riadok aj koncový koniec komentára)
     <g class="ridge-back1">
@@ -337,19 +344,33 @@
   var burst = svg.querySelector('.beam-burst');
   var lines = svg.querySelectorAll('.glowline');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var mobile = window.matchMedia('(max-width: 720px)').matches;
-  // na mobile bod zastane tesne za ľavým okrajom výrezu, vytŕčajú len lúče
-  var endX = mobile ? 450 : 374;
-  var endOff = mobile ? 7.1 : 0;   // čiara končí presne pri bode
+  var finished = false;
+
+  // Vypočíta koncovú pozíciu bodu podľa reálne viditeľného výrezu grafiky:
+  // bod je vždy na obrazovke (min. 60 jednotiek od ľavého okraja),
+  // na úzkych displejoch sa ľavé lúče orežú.
+  function getEnd(){
+    var r = svg.getBoundingClientRect();
+    var scale = Math.max(r.width / 1440, r.height / 900) || 1;
+    var leftUser = 720 - r.width / (2 * scale);   // ľavý okraj viditeľného výrezu v jednotkách SVG
+    var x = Math.max(374, leftUser + 60);
+    return { x: x, off: (x - 374) / 1066 * 100 }; // čiara končí presne pri bode
+  }
 
   function setPos(x){ if(burst) burst.setAttribute('transform', 'translate(' + x + ',560)'); }
   function setOff(o){
     for(var i = 0; i < lines.length; i++){ lines[i].style.strokeDashoffset = o; }
   }
-  function finalize(){ setPos(endX); setOff(endOff); svg.classList.add('engraved'); }
+  function finalize(){
+    var e = getEnd();
+    setPos(e.x); setOff(e.off);
+    finished = true;
+    svg.classList.add('engraved');
+  }
 
   function run(){
     if(reduce){ finalize(); return; }
+    var e = getEnd();
     var D = 2200, delay = 400, t0 = null;
     setPos(1440); setOff(100);
     function ease(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
@@ -357,13 +378,18 @@
       if(t0 === null) t0 = ts;
       var t = Math.min(Math.max((ts - t0 - delay) / D, 0), 1);
       var p = ease(t);
-      setPos(1440 + (endX - 1440) * p);
-      setOff(100 - (100 - endOff) * p);
+      setPos(1440 + (e.x - 1440) * p);
+      setOff(100 - (100 - e.off) * p);
       if(t < 1){ requestAnimationFrame(frame); }
-      else { svg.classList.add('engraved'); }
+      else { finished = true; svg.classList.add('engraved'); }
     }
     requestAnimationFrame(frame);
   }
+
+  // Pri zmene veľkosti okna / otočení mobilu prepočítaj pozíciu bodu
+  window.addEventListener('resize', function(){
+    if(finished){ var e = getEnd(); setPos(e.x); setOff(e.off); }
+  }, {passive:true});
 
   if(!('IntersectionObserver' in window)){ finalize(); }
   else {
