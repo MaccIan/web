@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maccia — gravírovanie a rezanie laserom</title>
 <meta name="description" content="Maccia — podtatranská dielňa. Laserom rezané a gravírované drevo: 3D LED dekorácie, gravírovanie na zákazku, spolupráce s fotografmi.">
+<!-- PRED-SPUSTENIE: zabráni Googlu indexovať stránku, pri ostrom spustení tento riadok zmaž -->
+<meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400;500;700&family=Josefin+Sans:wght@200;300&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -219,13 +221,80 @@
     border-top:1px solid var(--line);
   }
 
+  /* ---------- VSTUPNÁ BRÁNA (pred-spustenie) ---------- */
+  body.locked{overflow:hidden}
+  #gate{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    background:var(--night);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:1.5rem;
+  }
+  body:not(.locked) #gate{display:none}
+  .gate-name{
+    font-family:'Josefin Sans',sans-serif;
+    font-weight:300;
+    font-size:clamp(2.2rem,7vw,3.5rem);
+    letter-spacing:.08em;
+    color:var(--text);
+    text-shadow:0 0 14px rgba(255,180,94,.45),0 0 46px rgba(255,180,94,.25);
+    margin-bottom:1.2rem;
+  }
+  .gate-hint{
+    color:var(--muted);
+    font-size:.95rem;
+    margin-bottom:1.8rem;
+  }
+  .gate-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
+  #gate-pass{
+    background:var(--night-2);
+    border:1px solid var(--wood-dim);
+    color:var(--text);
+    font-family:'Instrument Sans',sans-serif;
+    font-size:1rem;
+    padding:.75rem 1rem;
+    min-width:200px;
+    outline:none;
+  }
+  #gate-pass:focus{border-color:var(--glow)}
+  #gate-btn{
+    font-family:'Tektur',sans-serif;
+    font-size:.9rem;
+    letter-spacing:.08em;
+    background:none;
+    border:1px solid var(--wood-dim);
+    color:var(--glow);
+    padding:.75rem 1.5rem;
+    cursor:pointer;
+    transition:border-color .25s,box-shadow .25s;
+  }
+  #gate-btn:hover{border-color:var(--glow);box-shadow:0 0 18px rgba(255,180,94,.22)}
+  .gate-err{color:#d98f8f;font-size:.85rem;margin-top:1rem}
+
   @media (max-width:720px){
     .grid{grid-template-columns:1fr;gap:2rem}
     .hero-center{padding-bottom:32vh}
   }
 </style>
 </head>
-<body>
+<body class="locked">
+
+<!-- PRED-SPUSTENIE: vstupná brána. Pri ostrom spustení zmaž tento blok aj skript "gate" nižšie. -->
+<div id="gate" role="dialog" aria-label="Vstup chránený heslom">
+  <p class="gate-name">maccia</p>
+  <p class="gate-hint">Stránka je v príprave. Zadajte heslo pre vstup.</p>
+  <div class="gate-row">
+    <input id="gate-pass" type="password" autocomplete="off" placeholder="heslo">
+    <button id="gate-btn" type="button">Vstúpiť</button>
+  </div>
+  <p id="gate-err" class="gate-err" hidden>Nesprávne heslo, skúste znova.</p>
+</div>
+
 
 <header class="hero">
   <nav class="topbar">
@@ -337,6 +406,54 @@
 </footer>
 
 <script>
+/* PRED-SPUSTENIE: brána s heslom. Pri ostrom spustení zmaž tento skript, blok #gate a class="locked" na body. */
+(function(){
+  // SHA-256 hash hesla — samotné heslo v kóde nie je
+  var HASH = '6aa4cb9a4e8059443e50fe4a513f830916c1731f0c19768f5504b5cfc5868f82';
+  var body = document.body;
+  var gate = document.getElementById('gate');
+  var pass = document.getElementById('gate-pass');
+  var btn  = document.getElementById('gate-btn');
+  var err  = document.getElementById('gate-err');
+
+  function unlock(){
+    body.classList.remove('locked');
+    document.dispatchEvent(new Event('maccia-unlock'));
+  }
+
+  // už odomknuté v tejto relácii prehliadača?
+  try{
+    if(sessionStorage.getItem('maccia_gate') === '1'){ unlock(); return; }
+  }catch(e){}
+
+  function sha256(str){
+    var data = new TextEncoder().encode(str);
+    return crypto.subtle.digest('SHA-256', data).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf), function(b){
+        return ('0' + b.toString(16)).slice(-2);
+      }).join('');
+    });
+  }
+
+  function attempt(){
+    sha256(pass.value.trim()).then(function(h){
+      if(h === HASH){
+        try{ sessionStorage.setItem('maccia_gate','1'); }catch(e){}
+        unlock();
+      } else {
+        err.hidden = false;
+        pass.value = '';
+        pass.focus();
+      }
+    });
+  }
+
+  btn.addEventListener('click', attempt);
+  pass.addEventListener('keydown', function(e){ if(e.key === 'Enter') attempt(); });
+  pass.focus();
+})();
+</script>
+<script>
 (function(){
   var svg = document.querySelector('.ridges');
   if(!svg) return;
@@ -391,8 +508,8 @@
     if(finished){ var e = getEnd(); setPos(e.x); setOff(e.off); }
   }, {passive:true});
 
-  if(!('IntersectionObserver' in window)){ finalize(); }
-  else {
+  function observeStart(){
+    if(!('IntersectionObserver' in window)){ finalize(); return; }
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
         if(!e.isIntersecting) return;
@@ -408,6 +525,13 @@
       });
     }, {threshold: 0.35});
     io.observe(svg);
+  }
+
+  // ak je stránka za bránou, spusti animáciu až po odomknutí
+  if(document.body.classList.contains('locked')){
+    document.addEventListener('maccia-unlock', observeStart, {once:true});
+  } else {
+    observeStart();
   }
 
   // Parallax: pri scrolle nadol sa zadné vrstvy zbiehajú k prednej,
