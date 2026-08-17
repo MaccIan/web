@@ -176,6 +176,20 @@
     margin-bottom:.6rem;
   }
   .cell p{color:var(--muted);font-size:.97rem}
+  .cell-photos{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(0,1fr));
+    gap:.5rem;
+    margin-top:1.1rem;
+  }
+  .cell-photos img{
+    width:100%;
+    aspect-ratio:4/5;
+    object-fit:cover;
+    display:block;
+    border:1px solid var(--line);
+    border-radius:4px;
+  }
 
   /* ---------- KONTAKT ---------- */
   .contact{background:var(--night-2)}
@@ -376,14 +390,25 @@
       <div class="cell">
         <h3>3D LED dekorácie</h3>
         <p>Veľkoformátové nástenné obrazy z vrstveného dreva s podsvietením. Hory, hrebene a scény, ktoré v tme ožijú.</p>
+        <div class="cell-photos">
+          <img src="led-1.jpg" loading="lazy" alt="3D LED dekorácia hôr nad posteľou">
+          <img src="led-2.jpg" loading="lazy" alt="Podsvietená silueta hôr na stene">
+          <img src="led-3.jpg" loading="lazy" alt="Podsvietený trojuholník s horou a lesom">
+        </div>
       </div>
       <div class="cell">
         <h3>Gravírovanie na zákazku</h3>
         <p>Osobné venovania, logá a motívy do dreva. Darčeky, ktoré sa nedajú kúpiť v obchode.</p>
+        <div class="cell-photos">
+          <img src="gravir-1.jpg" loading="lazy" alt="Gravírované drevené kľúčenky s menami">
+        </div>
       </div>
       <div class="cell">
         <h3>Pre fotografov</h3>
         <p>Rámiky, kalendáre a svadobné knihy ako doplnok k vašim zákazkám. Ozvite sa, dohodneme spoluprácu.</p>
+        <div class="cell-photos">
+          <img src="foto-1.jpg" loading="lazy" alt="Gravírovaná svadobná tabuľa s menami a dátumom">
+        </div>
       </div>
     </div>
   </div>
